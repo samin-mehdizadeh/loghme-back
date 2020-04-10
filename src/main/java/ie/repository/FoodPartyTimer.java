@@ -37,11 +37,16 @@ public class FoodPartyTimer extends TimerTask {
         urlreader = new urlReader();
         timerForSearch = new Timer();
         manager = Manager.getInstance();
-        timerForSearch.schedule(this,0,60000);
+        timerForSearch.schedule(this,0,85000);
+        FoodPartyCounter.getInstance().setTimer(85000);
+
     }
 
     @Override
     public void run() {
+        //FoodPartyCounter.getInstance().stop();
+        //FoodPartyCounter.getInstance().stop();
+        FoodPartyCounter.getInstance().stop();
         manager.assignNewDiscountFoods();
         if(manager.basketIsEmpty())
             manager.assignNewBasket();
@@ -75,5 +80,6 @@ public class FoodPartyTimer extends TimerTask {
                 manager.addRestaurant(restaurant);
         }
         System.out.println(result);
+        FoodPartyCounter.getInstance().start();
     }
 }

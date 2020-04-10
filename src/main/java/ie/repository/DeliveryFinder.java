@@ -14,7 +14,7 @@ public class DeliveryFinder extends TimerTask {
     }
 
     public void search(){
-        basket.setStatus("Finding Delivery");
+        basket.setStatus("FindingDelivery");
         timerForSearch = new Timer();
         timerForSearch.schedule(this,0,30000);
         timerForDelay = new Timer();
@@ -23,8 +23,8 @@ public class DeliveryFinder extends TimerTask {
     public Courier findBestCourier() {
         double min=1000;
         Courier chosen=null;
-        double restaurantX = basket.getRestaurant().getLocation().get("x");
-        double restaurantY = basket.getRestaurant().getLocation().get("y");
+        double restaurantX = Manager.getInstance().getRestaurantById(basket.getRestaurantId()).getLocation().get("x");
+        double restaurantY = Manager.getInstance().getRestaurantById(basket.getRestaurantId()).getLocation().get("y");
         for (int i = 0; i < couriers.size(); i++) {
             double time = couriers.get(i).calculateDuration(0,0,restaurantX,restaurantY);
             if(i == 0){
@@ -43,7 +43,7 @@ public class DeliveryFinder extends TimerTask {
     @Override
     public void run() {
 
-        if(basket.getStatus().equals("Finding Delivery")){
+        if(basket.getStatus().equals("FindingDelivery")){
             urlReader urlreader = new urlReader();
             try {
                 String messengersStr = urlreader.readURL("http://138.197.181.131:8080/deliveries");
@@ -55,8 +55,8 @@ public class DeliveryFinder extends TimerTask {
             if(!(couriers.isEmpty())){
                 basket.setStatus("Delivering");
                 Courier courier = findBestCourier();
-                double restaurantX = basket.getRestaurant().getLocation().get("x");
-                double restaurantY = basket.getRestaurant().getLocation().get("y");
+                double restaurantX = Manager.getInstance().getRestaurantById(basket.getRestaurantId()).getLocation().get("x");
+                double restaurantY = Manager.getInstance().getRestaurantById(basket.getRestaurantId()).getLocation().get("y");
                 basket.setRemainingTime((int)courier.calculateDuration(0,0,restaurantX,restaurantY));
                 timerForSearch.cancel();
                 basket.send();
@@ -65,4 +65,3 @@ public class DeliveryFinder extends TimerTask {
         }
     }
 }
-//

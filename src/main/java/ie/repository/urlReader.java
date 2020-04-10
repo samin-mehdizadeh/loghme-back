@@ -8,7 +8,9 @@ public class urlReader {
         String result = "";
         URL externalServer = new URL(url);
         BufferedReader in = new BufferedReader(
-                new InputStreamReader(externalServer.openStream()));
+                new InputStreamReader(externalServer.openStream(),"UTF8"));
+
+        //BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF8"));
 
         String inputLine;
         while ((inputLine = in.readLine()) != null)

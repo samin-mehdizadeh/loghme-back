@@ -1,31 +1,114 @@
 package ie.repository;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.nio.file.DirectoryStream;
+import java.util.*;
 
 public class Basket extends TimerTask {
-    private Restaurant restaurant;
-    private Map<Food, Integer> foods;
-    private Map<DiscountFood, Integer> discountFoods;
+    private String restaurantId;
+    private String restaurantName;
+    private List<FoodMap> foods;
+    private List<FoodMap> discountFoods;
     private String status;
     private String id;
 
-    public Map<DiscountFood, Integer> getDiscountFoods() {
+
+    public int descreaseOrdinaryFood(String foodName){
+        for(int i=0;i<foods.size();i++){
+            FoodMap food = foods.get(i);
+            if(food.getFoodName().equals(foodName)){
+                if(food.getCount() == 1){
+                    foods.remove(i);
+                    if(foods.isEmpty() && discountFoods.isEmpty()) {
+                        restaurantId = "null";
+                        restaurantName = "null";
+                    }
+                }
+                else
+                    food.decreaseCount();
+                return 0;
+            }
+        }
+        return -1;
+    }
+
+    public int decreasePartyFood(String foodName){
+        for(int i=0;i<discountFoods.size();i++){
+            FoodMap food = discountFoods.get(i);
+            if(food.getFoodName().equals(foodName)){
+                if(food.getCount() == 1){
+                    discountFoods.remove(i);
+                    if(foods.isEmpty() && discountFoods.isEmpty()) {
+                        restaurantId = "null";
+                        restaurantName = "null";
+                    }
+                }
+                else
+                    food.decreaseCount();
+                return 0;
+            }
+        }
+        return -1;
+    }
+
+
+    public String getRestaurantName() {
+        return restaurantName;
+    }
+
+    public void setRestaurantName(String restaurantName) {
+        this.restaurantName = restaurantName;
+    }
+
+    public List<FoodMap> getDiscountFoods() {
         return discountFoods;
     }
 
-    public void setDiscountFoods(Map<DiscountFood, Integer> discountFoods) {
+    public void setDiscountFoods(List<FoodMap> discountFoods) {
         this.discountFoods = discountFoods;
     }
 
-    public void addOrdinaryFoodToCart(Food food, Integer foodCount){
-        foods.put(food,foodCount);
+    public FoodMap findOrdinadyFood(String food){
+        for(int i=0;i<foods.size();i++){
+            if(foods.get(i).getFoodName().equals(food)){
+                return foods.get(i);
+            }
+        }
+        return null;
     }
 
-    public void addDiscountFoodToCart(DiscountFood food, Integer foodCount){
-        discountFoods.put(food,foodCount);
+    public void addOrdinaryFoodToCart(String food, int price,int count){
+        boolean find = false;
+        for(int i=0;i<foods.size();i++){
+            if(foods.get(i).getFoodName().equals(food)){
+                foods.get(i).addToCount(count);
+                find =true;
+            }
+        }
+        if(!find){
+            foods.add(new FoodMap(food,price,count));
+        }
+    }
+
+    public FoodMap findDiscountFood(String food){
+        for(int i=0;i<discountFoods.size();i++){
+            if(discountFoods.get(i).getFoodName().equals(food)){
+                return discountFoods.get(i);
+            }
+        }
+        return null;
+    }
+
+    public void addDiscountFoodToCart(String food,int price, int count){
+        boolean find = false;
+        for(int i=0;i<discountFoods.size();i++){
+            if(discountFoods.get(i).getFoodName().equals(food)){
+                discountFoods.get(i).addToCount(count);
+                find =true;
+            }
+        }
+        if(!find){
+            discountFoods.add(new FoodMap(food,price,count));
+        }
     }
 
     private int remainingTime;
@@ -48,28 +131,29 @@ public class Basket extends TimerTask {
     }
 
     public Basket(String _id) {
-        foods = new HashMap<Food, Integer>();
-        discountFoods = new HashMap<DiscountFood, Integer>();
+        foods = new ArrayList<>();
+        discountFoods = new ArrayList<>();
         id = _id;
+        restaurantId ="null";
     }
 
     public void emptyDiscountFoods(){
-        discountFoods = new HashMap<DiscountFood, Integer>();
+        discountFoods = new ArrayList<>();
     }
 
-    public Restaurant getRestaurant() {
-        return restaurant;
+    public String getRestaurantId() {
+        return restaurantId;
     }
 
-    public void setRestaurant(Restaurant restaurant) {
-        this.restaurant = restaurant;
+    public void setRestaurantId(String _restaurantId) {
+        this.restaurantId = _restaurantId;
     }
 
-    public Map<Food, Integer> getFoods() {
+    public List<FoodMap> getFoods() {
         return foods;
     }
 
-    public void setFoods(Map<Food, Integer> foods) {
+    public void setFoods(List<FoodMap> foods) {
         this.foods = foods;
     }
 

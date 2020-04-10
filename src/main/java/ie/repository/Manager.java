@@ -74,11 +74,11 @@ public class Manager {
         }
     }
 
-    public int checkFinalize(){ return client.checkFinalizeOrder(); }
+    public int finalizeOrder(){ return client.finalizeOrder(); }
     public boolean basketIsEmpty(){ return client.basketIsEmpty();}
-    public Map<Food, Integer> getClientOrdinaryCart() {return client.getCurrentBasket().getFoods();}
-    public Map<DiscountFood, Integer> getClientPartyCart() {return client.getCurrentBasket().getDiscountFoods();}
-    public Restaurant getClientRestaurant() { return client.getCurrentBasket().getRestaurant(); }
+    public List<FoodMap> getClientOrdinaryCart() {return client.getCurrentBasket().getFoods();}
+    public List<FoodMap> getClientPartyCart() {return client.getCurrentBasket().getDiscountFoods();}
+    public String getClientRestaurantId() { return client.getCurrentBasket().getRestaurantId(); }
     public int calculatePrice() { return client.calculatePrice(); }
     public void assignNewBasket() { client.assignNewBasket();}
     public void assignNewDiscountFoods() {client.assignNewDiscountFoods();}
