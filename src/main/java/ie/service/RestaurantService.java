@@ -197,7 +197,7 @@ public class RestaurantService {
     }
 
 
-    @RequestMapping(value = "/getDiscountFood/{inf}", method = RequestMethod.GET,
+    @RequestMapping(value = "/DiscountFood/{inf}", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public DiscountFood getDiscountFood(@PathVariable(value = "inf") String inf){
         String restaurantId = inf.split("-")[0];
