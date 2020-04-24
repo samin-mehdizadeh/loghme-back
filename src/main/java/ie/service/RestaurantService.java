@@ -1,4 +1,5 @@
 package ie.service;
+import ie.domain.Manager;
 import ie.repository.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -10,14 +11,21 @@ import java.util.ArrayList;
 public class RestaurantService {
     @RequestMapping(value = "/restaurants", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Restaurant> getRestaurants() {
-        List<Restaurant> restaurants = new ArrayList<Restaurant>();
-        restaurants = Manager.getInstance().getRestaurants();
-        return restaurants;
+    public List<RestaurantInfo> getRestaurants() {
+        List<Restaurant> restaurants = Manager.getInstance().getRestaurants();
+        List<RestaurantInfo> restaurantInfos = new ArrayList<>();
+        for(Restaurant restaurant: restaurants){
+            RestaurantInfo restaurantInfo = new RestaurantInfo();
+            restaurantInfo.setId(restaurant.getId());
+            restaurantInfo.setName(restaurant.getName());
+            restaurantInfo.setLogo(restaurant.getLogo());
+            restaurantInfos.add(restaurantInfo);
+        }
+        return restaurantInfos;
     }
 
     @RequestMapping(value = "/restaurantInfo/{id}", method = RequestMethod.GET)
-    public Restaurant getAvailableSeats(@PathVariable(value = "id") String id) {
+    public Restaurant getRestaurant(@PathVariable(value = "id") String id) {
         return Manager.getInstance().getRestaurantById(id);
     }
 
@@ -25,20 +33,7 @@ public class RestaurantService {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public List<DiscountFoodProps> getDiscountFoods() {
         List<DiscountFoodProps> allDiscountFoods = new ArrayList<>();
-        List<Restaurant> restaurants = Manager.getInstance().getRestaurants();
-        for (Restaurant restaurant : restaurants) {
-            if (!(restaurant.getFoodParty().isEmpty())) {
-                List<DiscountFood> foodParties = restaurant.getFoodParty();
-
-                for (DiscountFood food : foodParties) {
-                    DiscountFoodProps temp = new DiscountFoodProps();
-                    temp.setDiscountFood(food);
-                    temp.setOwnerRestaurant(restaurant);
-                    allDiscountFoods.add(temp);
-                }
-            }
-
-        }
+        allDiscountFoods  = Manager.getInstance().getDiscounts();
         return allDiscountFoods;
     }
 
@@ -113,9 +108,6 @@ public class RestaurantService {
 
         }
         else{
-            DeliveryFinder deliveryChecker = new DeliveryFinder(Manager.getInstance().getClient().getCurrentBasket());
-            deliveryChecker.search();
-            Manager.getInstance().getClient().assignNewBasket();
             result.setStatus(200);
             result.setMessage("خرید شما ثبت شد");
             return result;
@@ -156,7 +148,8 @@ public class RestaurantService {
         }
 
         Restaurant restaurant = Manager.getInstance().getRestaurantById(id);
-        DiscountFood partyFood = restaurant.findPartyFood(food);
+        System.out.println(restaurant.getId());
+        DiscountFood partyFood = Manager.getInstance().getPartyFood(restaurant.getId(),food);
         if(partyFood == null){
             addPartyFoodResult.setStatus(402);
             addPartyFoodResult.setMessage("مهلت غذا تمام شده است");
@@ -203,7 +196,7 @@ public class RestaurantService {
         String restaurantId = inf.split("-")[0];
         String food = inf.split("-")[1];
         Restaurant restaurant = Manager.getInstance().getRestaurantById(restaurantId);
-        DiscountFood dFood = restaurant.findPartyFood(food);
+        DiscountFood dFood = Manager.getInstance().getPartyFood(restaurantId,food);
         return dFood;
 
     }

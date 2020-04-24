@@ -1,11 +1,11 @@
 package ie.repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ie.domain.Manager;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class Client {
     private String name;
@@ -14,12 +14,40 @@ public class Client {
     private String emailAddress;
     private int credit;
     private int id;
+    private String username;
+    private String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     private List<Basket> baskets;
     private Basket currentBasket;
 
-    public Basket getBasketById(String id){
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+
+    public Basket getBasketById(int id){
         for(int i = 0; i < baskets.size(); i++){
-            if(baskets.get(i).getId().equals(id))
+            if(baskets.get(i).getId() == id)
                 return baskets.get(i);
         }
         return null;
@@ -27,6 +55,12 @@ public class Client {
 
     public Basket getCurrentBasket() {
         return currentBasket;
+    }
+
+    public void addBaskets(List<Basket> _baskets){
+        for(int i=0;i<_baskets.size();i++) {
+            addBasket(_baskets.get(i));
+        }
     }
 
     public void setCurrentBasket(Basket currentBasket) {
@@ -85,7 +119,7 @@ public class Client {
     public Client() {
         baskets = new ArrayList<Basket>();
         id = 0;
-        currentBasket = new Basket(Integer.toString(id));
+        currentBasket = new Basket(id);
     }
 
     public boolean hasNoRestaurant(){
@@ -97,7 +131,7 @@ public class Client {
 
     public int addPartyToCart(String discountFood,String restaurantId, int count){
         Restaurant restaurant = Manager.getInstance().getRestaurantById(restaurantId);
-        DiscountFood dFood = restaurant.findPartyFood(discountFood);
+        DiscountFood dFood = Manager.getInstance().getPartyFood(restaurant.getId(),discountFood);
         if(hasNoRestaurant()){
             if(dFood.getCount() >= count) {
                 currentBasket.setRestaurantId(restaurantId);
@@ -134,8 +168,8 @@ public class Client {
     }
 
     public int addOrdinaryToCart(String food,String restaurantId,int count){
-        Restaurant restaurant =Manager.getInstance().getRestaurantById(restaurantId);
-        Food oFood = restaurant.findOrdinaryFood(food);
+        Restaurant restaurant = Manager.getInstance().getRestaurantById(restaurantId);
+        Food oFood = Manager.getInstance().findOrdinaryFood(restaurantId,food);
         if(hasNoRestaurant()){
             currentBasket.setRestaurantId(restaurantId);
             currentBasket.setRestaurantName(restaurant.getName());
@@ -199,18 +233,29 @@ public class Client {
             return -1;
         }
         else {
-            baskets.add(currentBasket);
+            addBasket(currentBasket);
             List<FoodMap> party =  currentBasket.getDiscountFoods();
             Restaurant restaurant = Manager.getInstance().getRestaurantById(currentBasket.getRestaurantId());
             for(int i=0;i<party.size();i++){
-                DiscountFood key = restaurant.findPartyFood(party.get(i).getFoodName());
+                DiscountFood key = Manager.getInstance().getPartyFood(restaurant.getId(),party.get(i).getFoodName());
                 int value = party.get(i).getCount();
+                Manager.getInstance().updatePartyCount(party.get(i).getFoodName(),restaurant.getId(),key.getCount() - value);
                 key.decreaseCount(value);
             }
         }
-        id += 1;
-        credit = credit - price;
+
+        Manager.getInstance().addCredit(-price);
+        DeliveryFinder deliveryChecker = new DeliveryFinder(currentBasket);
+        deliveryChecker.search();
+
+        Manager.getInstance().insertBasketToDB(currentBasket);
+        Manager.getInstance().getClient().assignNewBasket();
         return 0;
+    }
+
+    public void addBasket(Basket b){
+        baskets.add(b);
+        id+=1;
     }
 
 
@@ -222,7 +267,7 @@ public class Client {
     }
 
     public void assignNewBasket(){
-        currentBasket = new Basket(Integer.toString(id));
+        currentBasket = new Basket(id);
     }
 
     public void assignNewDiscountFoods(){

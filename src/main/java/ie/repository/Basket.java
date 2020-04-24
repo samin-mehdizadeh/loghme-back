@@ -1,5 +1,7 @@
 package ie.repository;
 
+import ie.domain.Manager;
+
 import java.nio.file.DirectoryStream;
 import java.util.*;
 
@@ -9,7 +11,7 @@ public class Basket extends TimerTask {
     private List<FoodMap> foods;
     private List<FoodMap> discountFoods;
     private String status;
-    private String id;
+    private int id;
 
 
     public int descreaseOrdinaryFood(String foodName){
@@ -114,11 +116,11 @@ public class Basket extends TimerTask {
     private int remainingTime;
     private Timer timer;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -130,7 +132,7 @@ public class Basket extends TimerTask {
         this.remainingTime = remainingTime;
     }
 
-    public Basket(String _id) {
+    public Basket(int _id) {
         foods = new ArrayList<>();
         discountFoods = new ArrayList<>();
         id = _id;
@@ -175,6 +177,7 @@ public class Basket extends TimerTask {
     public void run() {
         if(remainingTime == 0) {
             status = "Done";
+            Manager.getInstance().changebasketStatusInDb(Manager.getInstance().getClient().getUsername(),id,"Done");
             timer.cancel();
         }
         else {

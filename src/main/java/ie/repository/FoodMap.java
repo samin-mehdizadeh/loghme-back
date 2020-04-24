@@ -4,12 +4,6 @@ public class FoodMap {
     String foodName;
     int foodPrice;
     int count;
-    /*public FoodMap(String name,int price){
-        this.foodName = name;
-        this.foodPrice = price;
-        count = 1;
-
-    }*/
 
     public FoodMap(String name,int price,int _count){
         this.foodName = name;

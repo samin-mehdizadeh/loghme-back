@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ie.domain.Manager;
 
 public class FoodPartyTimer extends TimerTask {
     private urlReader urlreader;
@@ -44,12 +45,12 @@ public class FoodPartyTimer extends TimerTask {
 
     @Override
     public void run() {
-        //FoodPartyCounter.getInstance().stop();
-        //FoodPartyCounter.getInstance().stop();
         FoodPartyCounter.getInstance().stop();
-        manager.assignNewDiscountFoods();
-        if(manager.basketIsEmpty())
-            manager.assignNewBasket();
+        if(manager.getClient() != null){
+            manager.assignNewDiscountFoods();
+            if(manager.basketIsEmpty())
+                manager.assignNewBasket();
+        }
         try {
             recoverRestaurants();
         } catch (IOException e) {
@@ -69,15 +70,9 @@ public class FoodPartyTimer extends TimerTask {
         try {
             result = result.replaceAll("menu","foodParty");
             foodPartyRestaurants = Arrays.asList(mapper.readValue(result, Restaurant[].class));
+            Manager.getInstance().addRestaurants(foodPartyRestaurants,"party");
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        for(Restaurant restaurant: foodPartyRestaurants){
-            Restaurant foundedRestaurant = manager.getRestaurantById(restaurant.getId());
-            if(foundedRestaurant != null)
-                foundedRestaurant.setFoodParty(restaurant.getFoodParty());
-            else
-                manager.addRestaurant(restaurant);
         }
         System.out.println(result);
         FoodPartyCounter.getInstance().start();

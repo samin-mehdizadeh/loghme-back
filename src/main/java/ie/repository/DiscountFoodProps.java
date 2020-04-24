@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class DiscountFoodProps {
     private DiscountFood discountFood;
-    private Restaurant ownerRestaurant;
-
+    private String ownerRestaurantName;
+    private String ownerRestaurantID;
     public DiscountFood getDiscountFood() {
         return discountFood;
     }
@@ -14,11 +14,19 @@ public class DiscountFoodProps {
         this.discountFood = discountFood;
     }
 
-    public Restaurant getOwnerRestaurant() {
-        return ownerRestaurant;
+    public String getOwnerRestaurantName() {
+        return ownerRestaurantName;
     }
 
-    public void setOwnerRestaurant(Restaurant ownerRestaurant) {
-        this.ownerRestaurant = ownerRestaurant;
+    public String getOwnerRestaurantID() {
+        return ownerRestaurantID;
+    }
+
+    public void setOwnerRestaurantID(String ownerRestaurantID) {
+        this.ownerRestaurantID = ownerRestaurantID;
+    }
+
+    public void setOwnerRestaurantName(String ownerRestaurantName) {
+        this.ownerRestaurantName = ownerRestaurantName;
     }
 }

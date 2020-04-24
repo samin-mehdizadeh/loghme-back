@@ -2,6 +2,7 @@ package ie.repository;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ie.domain.Manager;
 
 public class DeliveryFinder extends TimerTask {
     List<Courier> couriers;
@@ -54,6 +55,7 @@ public class DeliveryFinder extends TimerTask {
             }
             if(!(couriers.isEmpty())){
                 basket.setStatus("Delivering");
+                Manager.getInstance().changebasketStatusInDb(Manager.getInstance().getClient().getUsername(),basket.getId(),"Delivering");
                 Courier courier = findBestCourier();
                 double restaurantX = Manager.getInstance().getRestaurantById(basket.getRestaurantId()).getLocation().get("x");
                 double restaurantY = Manager.getInstance().getRestaurantById(basket.getRestaurantId()).getLocation().get("y");
