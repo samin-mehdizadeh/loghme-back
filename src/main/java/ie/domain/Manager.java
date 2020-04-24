@@ -103,10 +103,10 @@ public class Manager {
 
     }
 
-    public List<Restaurant> getSearchedRestaurants(String restaurant, String food){
+    public List<Restaurant> getSearchedRestaurants(String restaurant, String food,int page,int limit){
         List<Restaurant> searchedRestaurants = new ArrayList<>();
         try {
-            searchedRestaurants = RestaurantMapper.getInstance().selectRestaurant(restaurant,food);
+            searchedRestaurants = RestaurantMapper.getInstance().selectRestaurant(restaurant,food,page,limit);
 
         }catch (SQLException e) {
             e.printStackTrace();

@@ -21,7 +21,7 @@ public class ConnectionPool {
         dataSource = new ComboPooledDataSource();
         dataSource.setJdbcUrl("jdbc:mysql://localhost:3306/Loghme");
         dataSource.setUser("root");
-        dataSource.setPassword("haniyeh74639037463903");
+        dataSource.setPassword("smre1378");
 
         dataSource.setInitialPoolSize(5);
         dataSource.setMinPoolSize(5);

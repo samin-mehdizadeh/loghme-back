@@ -127,19 +127,20 @@ public class RestaurantMapper {
     }
 
 
-    public List<Restaurant> selectRestaurant(String restaurant, String food) throws SQLException{
+    public List<Restaurant> selectRestaurant(String restaurant, String food,int page,int limit) throws SQLException{
         List<Restaurant> searchedRestaurants = new ArrayList<>();
+        int offset = (page-1)*limit;
         Connection connection = ConnectionPool.getInstance().getConnection();
         Statement statement = connection.createStatement();;
         ResultSet result = null;
         if(food.equals("")){
-            result = statement.executeQuery("select id, name, logo from Restaurant" + " where Restaurant.name LIKE " + "'%" + restaurant + "%'");
+            result = statement.executeQuery("select id, name, logo from Restaurant" + " where Restaurant.name LIKE " + "'%" + restaurant + "%'"+ "limit "+limit+ " offset "+offset);
 
         }
 
         else if(restaurant.equals("")){
             result = statement.executeQuery("select distinct Restaurant.id, Restaurant.name, Restaurant.logo from Restaurant,OrdinaryFood" + " where Restaurant.id = OrdinaryFood.restaurantId" +
-                    " and OrdinaryFood.foodName LIKE " + "'%" + food + "%'");
+                    " and OrdinaryFood.foodName LIKE " + "'%" + food + "%'"+ "limit "+limit+ " offset "+offset);
 
         }
 
@@ -147,7 +148,8 @@ public class RestaurantMapper {
             result = statement.executeQuery("select distinct Restaurant.id, Restaurant.name, Restaurant.logo from Restaurant,OrdinaryFood" +
                     " where Restaurant.name LIKE " + "'%" + restaurant + "%'"+
                     " and OrdinaryFood.foodName LIKE " + "'%" + food + "%'"+
-                    " and OrdinaryFood.restaurantId = Restaurant.id");
+                    " and OrdinaryFood.restaurantId = Restaurant.id"
+                    + "limit "+limit+ " offset "+offset);
         }
 
         while(result.next()) {
