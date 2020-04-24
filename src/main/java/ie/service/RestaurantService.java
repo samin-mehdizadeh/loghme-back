@@ -1,6 +1,7 @@
 package ie.service;
 import ie.domain.Manager;
 import ie.repository.*;
+import ie.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,10 +10,10 @@ import java.util.ArrayList;
 
 @RestController
 public class RestaurantService {
-    @RequestMapping(value = "/restaurants", method = RequestMethod.GET,
+    @RequestMapping(value = "/restaurants/{page}/{limit}", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<RestaurantInfo> getRestaurants() {
-        List<Restaurant> restaurants = Manager.getInstance().getRestaurants();
+    public List<RestaurantInfo> getRestaurants(@PathVariable(value = "page") int page,@PathVariable(value = "limit") int limit) {
+        List<Restaurant> restaurants = Manager.getInstance().getRestaurants(page,limit);
         List<RestaurantInfo> restaurantInfos = new ArrayList<>();
         for(Restaurant restaurant: restaurants){
             RestaurantInfo restaurantInfo = new RestaurantInfo();

@@ -1,5 +1,7 @@
 package ie.domain;
 import ie.repository.*;
+import ie.domain.*;
+import ie.service.DiscountFoodProps;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -8,8 +10,6 @@ import java.util.List;
 
 public class Manager {
     private static Manager instance;
-    //private List<Restaurant> restaurants;
-    //private List<Client> _users;
     private Client client;
 
     public void setClient(Client _client){
@@ -18,11 +18,6 @@ public class Manager {
 
     public Client getClient(){
         return client;
-    }
-
-    private Manager() {
-        //restaurants = new ArrayList<Restaurant>();
-        //_users = new ArrayList<Client>();
     }
 
     public void updatePartyCount(String food, String id, int value){
@@ -57,8 +52,7 @@ public class Manager {
     }
 
     public Food findOrdinaryFood(String restaurantId, String foodName){
-        Food f = new Food();
-        f = FoodMapper.getInstance().getFood(restaurantId,foodName);
+        Food f = FoodMapper.getInstance().getFood(restaurantId,foodName);
         return f;
     }
 
@@ -70,14 +64,20 @@ public class Manager {
                 result = 0;
             }
             else{
-                client = selectedClient;
-                this.insertPreviousOrdersFromDb();
+                setClient(selectedClient);
+                int price = OrderMapper.getInstance().recoverOrdersAndGetAdditionalPrice(username);
+                addCredit(price);
+                insertPreviousOrdersFromDb(username);
+
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         return result;
+    }
+
+    public int getMaxOrderId(String username){
+        return OrderMapper.getInstance().getMaxOrderId(username);
     }
 
     public int addCredit(int credit){
@@ -100,14 +100,6 @@ public class Manager {
 
     public void addRestaurants(List<Restaurant> _restaurants,String type){
         RestaurantMapper.getInstance().insertRestaurants(_restaurants,type);
-        /*try {
-            List<Restaurant> dbRestaurants = RestaurantMapper.getInstance().getRestaurantsFromDB();
-            for(Restaurant restaurant : dbRestaurants){
-                this.restaurants.add(restaurant);
-            }
-        } catch (SQLException | IOException e) {
-            e.printStackTrace();
-        }*/
 
     }
 
@@ -121,23 +113,25 @@ public class Manager {
         }
 
         return searchedRestaurants;
+
+
     }
 
     public void insertBasketToDB(Basket basket){
         OrderMapper.getInstance().insertOrder(basket);
     }
 
-    public void insertPreviousOrdersFromDb(){
-        List<Basket> baskets= OrderMapper.getInstance().getPreviousOrdersFromDb();
+    public void insertPreviousOrdersFromDb(String username){
+        List<Basket> baskets= OrderMapper.getInstance().getPreviousOrdersFromDb(username);
         if(!baskets.isEmpty()){
-            client.addBaskets(baskets);
+            client.addBasketsFromDb(baskets);
         }
     }
 
-    public List<Restaurant> getRestaurants(){
+    public List<Restaurant> getRestaurants(int page,int limit){
         List<Restaurant> dbRestaurants = new ArrayList<>();
         try {
-            dbRestaurants = RestaurantMapper.getInstance().getRestaurantsFromDB();
+            dbRestaurants = RestaurantMapper.getInstance().getRestaurantsFromDB(page,limit);
         } catch (SQLException | IOException e) {
             e.printStackTrace();
         }

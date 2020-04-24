@@ -1,7 +1,6 @@
 package ie.service;
 
-import ie.repository.Basket;
-import ie.repository.Client;
+import ie.domain.*;
 import ie.domain.Manager;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

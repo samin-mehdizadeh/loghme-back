@@ -1,4 +1,4 @@
-package ie.repository;
+package ie.domain;
 
 public class FoodMap {
     String foodName;

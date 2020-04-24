@@ -1,7 +1,8 @@
-package ie.repository;
+package ie.domain;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ie.domain.Manager;
+import ie.domain.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,6 +17,12 @@ public class Client {
     private int id;
     private String username;
     private String password;
+
+    public Client() {
+        baskets = new ArrayList<Basket>();
+        id = 0;
+        currentBasket = new Basket(id);
+    }
 
     public String getUsername() {
         return username;
@@ -57,10 +64,12 @@ public class Client {
         return currentBasket;
     }
 
-    public void addBaskets(List<Basket> _baskets){
+    public void addBasketsFromDb(List<Basket> _baskets){
         for(int i=0;i<_baskets.size();i++) {
             addBasket(_baskets.get(i));
         }
+        id = Manager.getInstance().getMaxOrderId(username)+1;
+        Manager.getInstance().getClient().getCurrentBasket().setId(id);
     }
 
     public void setCurrentBasket(Basket currentBasket) {
@@ -116,11 +125,6 @@ public class Client {
         this.baskets = baskets;
     }
 
-    public Client() {
-        baskets = new ArrayList<Basket>();
-        id = 0;
-        currentBasket = new Basket(id);
-    }
 
     public boolean hasNoRestaurant(){
         if(currentBasket.getRestaurantId() == "null")
@@ -255,7 +259,7 @@ public class Client {
 
     public void addBasket(Basket b){
         baskets.add(b);
-        id+=1;
+        this.id+=1;
     }
 
 

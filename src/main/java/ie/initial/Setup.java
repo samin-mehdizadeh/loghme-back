@@ -1,6 +1,7 @@
 package ie.initial;
 import ie.domain.Manager;
 import ie.repository.*;
+import ie.domain.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;

@@ -1,9 +1,9 @@
 package ie.repository;
-
+import ie.service.DiscountFoodProps;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
+import ie.domain.*;
 public class PartyFoodMapper {
     private static PartyFoodMapper instance;
 

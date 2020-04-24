@@ -1,4 +1,4 @@
-package ie.repository;
+package ie.domain;
 import java.io.IOException;
 import java.util.*;
 
@@ -23,7 +23,7 @@ public class FoodPartyTimer extends TimerTask {
         }
     }
 
-    public void recoverRestaurants() throws IOException {
+   /* public void recoverRestaurants() throws IOException {
         List <Restaurant> allRestaurants =  manager.getRestaurants();
         for(Restaurant restaurant:allRestaurants) {
             if ((restaurant.getMenu().isEmpty()) && (restaurant.getFoodParty().size() > 0))
@@ -31,7 +31,7 @@ public class FoodPartyTimer extends TimerTask {
             restaurant.clearFoodParty();
         }
 
-    }
+    }*/
 
 
     public void start(){
@@ -51,11 +51,11 @@ public class FoodPartyTimer extends TimerTask {
             if(manager.basketIsEmpty())
                 manager.assignNewBasket();
         }
-        try {
+       /* try {
             recoverRestaurants();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
         String result = "";
 

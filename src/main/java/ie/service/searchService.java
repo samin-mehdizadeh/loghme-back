@@ -1,7 +1,7 @@
 package ie.service;
 
 import ie.domain.Manager;
-import ie.repository.Restaurant;
+import ie.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

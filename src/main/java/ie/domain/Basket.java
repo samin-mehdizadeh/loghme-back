@@ -1,6 +1,7 @@
-package ie.repository;
+package ie.domain;
 
 import ie.domain.Manager;
+import ie.domain.*;
 
 import java.nio.file.DirectoryStream;
 import java.util.*;

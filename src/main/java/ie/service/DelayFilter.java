@@ -3,7 +3,7 @@ package ie.service;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import java.io.IOException;
-@WebFilter(urlPatterns = { "/restaurants","/DiscountFoods","/restaurantInfo/*"})
+@WebFilter(urlPatterns = { "/restaurants","/DiscountFoods","/restaurantInfo/*","/search"})
 public class DelayFilter implements Filter {
 
     @Override
@@ -14,7 +14,6 @@ public class DelayFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws  IOException, ServletException {
         try {
             Thread.sleep(1000);
-            System.out.println("filter");
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

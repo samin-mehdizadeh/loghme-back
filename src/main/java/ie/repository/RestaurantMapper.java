@@ -1,5 +1,5 @@
 package ie.repository;
-
+import ie.domain.*;
 import java.io.IOException;
 import java.sql.*;
 import java.util.ArrayList;
@@ -88,13 +88,14 @@ public class RestaurantMapper {
         }
     }
 
-    public List<Restaurant> getRestaurantsFromDB() throws SQLException, IOException {
+    public List<Restaurant> getRestaurantsFromDB(int page,int limit) throws SQLException, IOException {
         restaurants = new ArrayList<>();
+        int offset = (page-1)*limit;
         Connection connection = ConnectionPool.getInstance().getConnection();
         Statement restaurantsStatement = connection.createStatement();
         Statement OrdinaryFoodStatement = connection.createStatement();
         ResultSet restaurantsResult = restaurantsStatement.executeQuery(
-                "select * from Restaurant ");
+                "select * from Restaurant limit "+limit+" offset "+offset);
         while(restaurantsResult.next()) {
             Restaurant Ri = new Restaurant();
             Ri.setId(restaurantsResult.getString("id"));

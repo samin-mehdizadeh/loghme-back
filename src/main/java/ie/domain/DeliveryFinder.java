@@ -1,4 +1,4 @@
-package ie.repository;
+package ie.domain;
 import java.util.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

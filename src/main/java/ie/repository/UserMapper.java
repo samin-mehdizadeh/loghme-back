@@ -1,5 +1,5 @@
 package ie.repository;
-
+import ie.domain.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;

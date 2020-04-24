@@ -1,4 +1,4 @@
-package ie.repository;
+package ie.domain;
 
 import java.net.*;
 import java.io.*;

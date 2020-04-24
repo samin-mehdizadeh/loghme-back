@@ -1,5 +1,5 @@
 package ie.repository;
-
+import ie.domain.*;
 import ie.domain.Manager;
 
 import javax.swing.plaf.nimbus.State;
@@ -20,7 +20,7 @@ public class OrderMapper {
             Connection connection = ConnectionPool.getInstance().getConnection();
             connection.setAutoCommit(false);
             PreparedStatement pStatement = connection.prepareStatement(
-                    "insert into DiscountOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
+                    "replace into DiscountOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
             List<FoodMap> partyFood = basket.getDiscountFoods();
             List<FoodMap> ordinaryFood = basket.getFoods();
             for (int i = 0; i < partyFood.size(); i++) {
@@ -37,7 +37,7 @@ public class OrderMapper {
             pStatement.executeBatch();
             pStatement.close();
             pStatement = connection.prepareStatement(
-                   "insert into OrdinaryOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
+                   "replace into OrdinaryOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
             for (int i = 0; i < ordinaryFood.size(); i++) {
                 FoodMap food = ordinaryFood.get(i);
                 pStatement.setString(1, Manager.getInstance().getClient().getUsername());
@@ -61,46 +61,75 @@ public class OrderMapper {
 
     }
 
-   public List<Basket> getPreviousOrdersFromDb() {
+   public List<Basket> getPreviousOrdersFromDb(String username) {
        List<Basket> baskets=new ArrayList<>();
        try {
            Connection connection = ConnectionPool.getInstance().getConnection();
            Statement ordinaryStmt = connection.createStatement();
            Statement discountStmt = connection.createStatement();
-           ResultSet ordinaryResult= ordinaryStmt.executeQuery("SELECT * FROM OrdinaryOrders where username = \"" + Manager.getInstance().getClient().getUsername()
-                   + "\" ORDER BY orderId");
-           int number = -1;
-           Basket basket = null;
-           while (ordinaryResult.next()) {
-               int orderId = ordinaryResult.getInt("orderId");
-               if(orderId!=number){
-                   number = orderId;
-                   String rid = ordinaryResult.getString("restaurantId");
-                   basket = new Basket(number);
-                   baskets.add(basket);
-                   basket.setRestaurantId(rid);
-                   basket.setRestaurantName(Manager.getInstance().getRestaurantById(rid).getName());
-                   basket.setStatus(ordinaryResult.getString("status"));
-                   ResultSet discountResult = discountStmt.executeQuery("SELECT * FROM DiscountOrders where username = \"" + Manager.getInstance().getClient().getUsername()
-                           + "\" and orderId = "+number);
-                   while(discountResult.next()){
+           Statement maxOrdinary =connection.createStatement();
+           Statement maxParty = connection.createStatement();
+           int maxo=-1;
+           int maxp=-1;
+           int max=-1;
+           ResultSet rmaxOrdinary = maxOrdinary.executeQuery("select max(OrderId) as max from OrdinaryOrders where username = \""+ username +"\"");
+           while(rmaxOrdinary.next()){
+               maxo = rmaxOrdinary.getInt("max");
+           }
+           rmaxOrdinary.close();
+           maxOrdinary.close();
+           ResultSet rmaxParty = maxParty.executeQuery("select max(OrderId) as max from DiscountOrders where username = \""+ username +"\"");
+           while(rmaxParty.next()){
+               maxp = rmaxParty.getInt("max");
+           }
+           rmaxParty.close();
+           maxParty.close();
+           if(maxo>maxp)
+               max=maxo;
+           else
+               max=maxp;
+           if (max != -1) {
+               for(int i=0;i<=max;i++){
+                   Basket basket=new Basket(i);
+                   ResultSet ordinaryResult= ordinaryStmt.executeQuery("SELECT * FROM OrdinaryOrders where username = \"" + username
+                           + "\" and orderId = "+i);
+                   boolean flag = true;
+                   while (ordinaryResult.next()){
+                       if(flag){
+                           String rid = ordinaryResult.getString("restaurantId");
+                           basket.setRestaurantId(rid);
+                           basket.setRestaurantName(Manager.getInstance().getRestaurantById(rid).getName());
+                           basket.setStatus(ordinaryResult.getString("status"));
+                           flag = false;
+                       }
+                       String food = ordinaryResult.getString("foodName");
+                       int price =  ordinaryResult.getInt("foodPrice");
+                       int count = ordinaryResult.getInt("foodCount");
+                       basket.addOrdinaryFoodToCart(food,price,count);
+                   }
+                   ordinaryResult.close();
+                   ResultSet discountResult = discountStmt.executeQuery("SELECT * FROM DiscountOrders where username = \"" + username
+                           + "\" and orderId = "+i);
+                   while (discountResult.next()){
+                       if(flag){
+                           String rid = discountResult.getString("restaurantId");
+                           basket.setRestaurantId(rid);
+                           basket.setRestaurantName(Manager.getInstance().getRestaurantById(rid).getName());
+                           basket.setStatus(discountResult.getString("status"));
+                           flag = false;
+                       }
                        String food = discountResult.getString("foodName");
                        int price =  discountResult.getInt("foodPrice");
                        int count = discountResult.getInt("foodCount");
                        basket.addDiscountFoodToCart(food,price,count);
                    }
                    discountResult.close();
+                   if(!flag)
+                       baskets.add(basket);
+
                }
-               else{
-                   String food = ordinaryResult.getString("foodName");
-                   int price =  ordinaryResult.getInt("foodPrice");
-                   int count = ordinaryResult.getInt("foodCount");
-                   if(basket!=null) {
-                       basket.addOrdinaryFoodToCart(food,price,count);
-                   }
-               }
+
            }
-            ordinaryResult.close();
             ordinaryStmt.close();
             discountStmt.close();
             connection.close();
@@ -128,6 +157,74 @@ public class OrderMapper {
         catch(SQLException e){
             e.printStackTrace();
         }
+
+    }
+
+    public int recoverOrdersAndGetAdditionalPrice(String username){
+        int price = 0;
+        try {
+            Connection connection = ConnectionPool.getInstance().getConnection();
+            Statement ordinaryStmt = connection.createStatement();
+            Statement discountStmt = connection.createStatement();
+            ResultSet ordinaryResult = ordinaryStmt.executeQuery("SELECT * FROM OrdinaryOrders where username = \"" + username
+                    + "\" and status!=\"Done\"");
+            while (ordinaryResult.next()){
+                price += ordinaryResult.getInt("foodCount")*ordinaryResult.getInt("foodPrice");
+            }
+            ordinaryResult.close();
+            ordinaryStmt.close();
+            ResultSet discountResult = discountStmt.executeQuery("SELECT * FROM DiscountOrders where username = \"" + username
+                    + "\" and status!=\"Done\"");
+            while (discountResult.next()){
+                price += discountResult.getInt("foodCount")*discountResult.getInt("foodPrice");
+            }
+            discountResult.close();
+            discountStmt.close();
+            connection.setAutoCommit(false);
+            Statement remove=connection.createStatement();
+            remove.addBatch("DELETE from OrdinaryOrders where username =\""+ username + "\" and status!=\"Done\"");
+            remove.addBatch("DELETE from DiscountOrders where username =\""+ username + "\" and status!=\"Done\"");
+            remove.executeBatch();
+            connection.commit();
+            remove.close();
+            connection.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return price;
+    }
+
+    public int getMaxOrderId(String username){
+        int max=-1;
+        try{
+            Connection connection = ConnectionPool.getInstance().getConnection();
+            Statement maxOrdinary =connection.createStatement();
+            Statement maxParty = connection.createStatement();
+            int maxo=-1;
+            int maxp=-1;
+            ResultSet rmaxOrdinary = maxOrdinary.executeQuery("select max(OrderId) as max from OrdinaryOrders where username = \""+ username +"\"");
+            while(rmaxOrdinary.next()){
+                maxo = rmaxOrdinary.getInt("max");
+            }
+            rmaxOrdinary.close();
+            maxOrdinary.close();
+            ResultSet rmaxParty = maxParty.executeQuery("select max(OrderId) as max from DiscountOrders where username = \""+ username +"\"");
+            while(rmaxParty.next()){
+                maxp = rmaxParty.getInt("max");
+            }
+            rmaxParty.close();
+            maxParty.close();
+            if(maxo>maxp)
+                max=maxo;
+            else
+                max=maxp;
+            connection.close();
+        }
+
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        return max;
 
     }
 }
