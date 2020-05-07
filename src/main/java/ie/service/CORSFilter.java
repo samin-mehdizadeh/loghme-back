@@ -11,6 +11,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+
 @WebFilter("/*")
 public class CORSFilter implements Filter {
 
@@ -30,13 +31,13 @@ public class CORSFilter implements Filter {
 
         ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Origin", "*");
         ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST");
-
+        ((HttpServletResponse) servletResponse).addHeader("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Authorization, Origin, Accept, Access-Control-Request-Method, Access-Control-Request-Headers");
         HttpServletResponse resp = (HttpServletResponse) servletResponse;
 
-        if (request.getMethod().equals("OPTIONS")) {
+       if (request.getMethod().equals("OPTIONS")) {
             resp.setStatus(HttpServletResponse.SC_ACCEPTED);
             return;
-        }
+       }
 
         chain.doFilter(request, servletResponse);
     }

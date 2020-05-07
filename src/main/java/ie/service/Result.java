@@ -3,6 +3,7 @@ package ie.service;
 public class Result {
     private int status;
     private String message;
+    private String token;
 
     public String getMessage() {
         return message;
@@ -18,5 +19,13 @@ public class Result {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

@@ -100,13 +100,20 @@ public class UserMapper {
 
     }
 
-    public Client selectUser(String username, String password) throws SQLException {
+    public Client selectUser(String username, String password,int firstTime) throws SQLException {
         Client loggedInClient = new Client();
         Connection connection = ConnectionPool.getInstance().getConnection();
         Statement userSearchStatement = connection.createStatement();
-        ResultSet restaurantResult = userSearchStatement.executeQuery(
-                "select * from User where User.username = \"" + username + "\""
-                        + " and USER.password = \"" + password + "\"");
+        ResultSet restaurantResult = null;
+        if(firstTime==1){
+            restaurantResult = userSearchStatement.executeQuery(
+                    "select * from User where User.username = \"" + username + "\""
+                            + " and USER.password = \"" + password + "\"");
+        }
+        else{
+            restaurantResult = userSearchStatement.executeQuery(
+                    "select * from User where User.username = \"" + username + "\"");
+        }
 
         boolean empty = true;
         while( restaurantResult.next() ) {
@@ -131,6 +138,23 @@ public class UserMapper {
         restaurantResult.close();
         connection.close();
         return loggedInClient;
+    }
+
+    public void deleteUserBasket(String username){
+        try {
+            Connection connection = ConnectionPool.getInstance().getConnection();
+            connection.setAutoCommit(false);
+            Statement remove = connection.createStatement();
+            remove.addBatch("DELETE from CurrentOrdinary where username =\"" + username+"\"");
+            remove.addBatch("DELETE from CurrentDiscount where username =\"" + username+"\"");
+            remove.executeBatch();
+            connection.commit();
+            remove.close();
+            connection.close();
+        } catch (SQLException e) {
+                System.out.println(e.getMessage());
+        }
+
     }
 
 

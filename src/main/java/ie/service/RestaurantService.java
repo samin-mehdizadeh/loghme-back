@@ -56,6 +56,7 @@ public class RestaurantService {
             id = Manager.getInstance().getClient().getCurrentBasket().getRestaurantId();
         }
         int status = Manager.getInstance().getClient().addOrdinaryToCart(food, id,count);
+        System.out.println( Manager.getInstance().getClient().getCurrentBasket());
         Result result = new Result();
         if(status == 0)
             result.setStatus(200);

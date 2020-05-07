@@ -56,10 +56,10 @@ public class Manager {
         return f;
     }
 
-    public int setUser(String username,String password){
+    /*public int setUser(String username){
         int result = 1;
         try {
-            Client selectedClient = UserMapper.getInstance().selectUser(username,password);
+            Client selectedClient = UserMapper.getInstance().selectUser(username,"",0);
             if(selectedClient == null){
                 result = 0;
             }
@@ -74,7 +74,7 @@ public class Manager {
             e.printStackTrace();
         }
         return result;
-    }
+    }*/
 
     public int getMaxOrderId(String username){
         return OrderMapper.getInstance().getMaxOrderId(username);
