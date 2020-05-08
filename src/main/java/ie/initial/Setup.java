@@ -32,7 +32,7 @@ public class Setup implements ServletContextListener {@Override
         }
         Manager.getInstance().addRestaurants(restaurants,"ordinary");
         //Manager.getInstance().getUsersDB();
-
+        Manager.getInstance().recoverOrdersInDb();
         FoodPartyTimer foodPartyTimer = new FoodPartyTimer();
         foodPartyTimer.start();
     }

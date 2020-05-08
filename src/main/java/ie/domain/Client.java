@@ -14,14 +14,14 @@ public class Client {
     private String phoneNumber;
     private String emailAddress;
     private int credit;
-    private int id;
+   // private int id;
     private String username;
     private String password;
 
     public Client() {
         baskets = new ArrayList<Basket>();
-        id = 0;
-        currentBasket = new Basket(id);
+        //id = 0;
+        //currentBasket = new Basket(id);
     }
 
     public String getUsername() {
@@ -35,13 +35,13 @@ public class Client {
     private List<Basket> baskets;
     private Basket currentBasket;
 
-    public int getId() {
+   /* public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
-    }
+    }*/
 
     public String getPassword() {
         return password;
@@ -68,8 +68,6 @@ public class Client {
         for(int i=0;i<_baskets.size();i++) {
             addBasket(_baskets.get(i));
         }
-        id = Manager.getInstance().getMaxOrderId(username)+1;
-        Manager.getInstance().getClient().getCurrentBasket().setId(id);
     }
 
     public void setCurrentBasket(Basket currentBasket) {
@@ -141,6 +139,7 @@ public class Client {
                 currentBasket.setRestaurantId(restaurantId);
                 currentBasket.setRestaurantName(restaurant.getName());
                 currentBasket.addDiscountFoodToCart(discountFood,dFood.getPrice(),count);
+                Manager.getInstance().addCurrentFoodToDb(discountFood,count,dFood.getPrice(),restaurantId,"party");
                 return 0;
             }
             return -2;
@@ -158,12 +157,14 @@ public class Client {
             }
             else {
                 currentBasket.addDiscountFoodToCart(discountFood, dFood.getPrice(),count);
+                Manager.getInstance().addCurrentFoodToDb(discountFood,count,dFood.getPrice(),restaurantId,"party");
                 return 0;
             }
         }
         else {
             if(dFood.getCount() >= count) {
                 currentBasket.addDiscountFoodToCart(discountFood,dFood.getPrice(),count);
+                Manager.getInstance().addCurrentFoodToDb(discountFood,count,dFood.getPrice(),restaurantId,"party");
                 return 0;
             }
             return -2;
@@ -178,6 +179,7 @@ public class Client {
             currentBasket.setRestaurantId(restaurantId);
             currentBasket.setRestaurantName(restaurant.getName());
             currentBasket.addOrdinaryFoodToCart(food,oFood.getPrice(),count);
+            Manager.getInstance().addCurrentFoodToDb(food,count,oFood.getPrice(),restaurantId,"ordinary");
             return 0;
         }
         else {
@@ -186,6 +188,7 @@ public class Client {
                 return -1;
             } else {
                 currentBasket.addOrdinaryFoodToCart(food, oFood.getPrice(),count);
+                Manager.getInstance().addCurrentFoodToDb(food,count,oFood.getPrice(),restaurantId,"ordinary");
                 return 0;
             }
         }
@@ -221,10 +224,12 @@ public class Client {
     }
 
     public int decreaseOrdinaryFood(String foodName){
+        Manager.getInstance().decreaseFoodCountInDb(foodName,"ordinary");
         return currentBasket.descreaseOrdinaryFood(foodName);
     }
 
     public int decreasePartyFood(String foodName){
+        Manager.getInstance().decreaseFoodCountInDb(foodName,"party");
         return currentBasket.decreasePartyFood(foodName);
     }
 
@@ -251,15 +256,14 @@ public class Client {
         Manager.getInstance().addCredit(-price);
         DeliveryFinder deliveryChecker = new DeliveryFinder(currentBasket);
         deliveryChecker.search();
-
         Manager.getInstance().insertBasketToDB(currentBasket);
-        Manager.getInstance().getClient().assignNewBasket();
+        Manager.getInstance().removeCurrentUserBasketInDb();
+       // Manager.getInstance().getClient().assignNewBasket();
         return 0;
     }
 
     public void addBasket(Basket b){
         baskets.add(b);
-        this.id+=1;
     }
 
 
@@ -270,12 +274,12 @@ public class Client {
             return false;
     }
 
-    public void assignNewBasket(){
+   /* public void assignNewBasket(){
         currentBasket = new Basket(id);
     }
 
     public void assignNewDiscountFoods(){
         currentBasket.emptyDiscountFoods();
-    }
+    }*/
 }
 

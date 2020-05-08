@@ -20,7 +20,7 @@ public class OrderMapper {
             Connection connection = ConnectionPool.getInstance().getConnection();
             connection.setAutoCommit(false);
             PreparedStatement pStatement = connection.prepareStatement(
-                    "replace into DiscountOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
+                    "insert into DiscountOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
             List<FoodMap> partyFood = basket.getDiscountFoods();
             List<FoodMap> ordinaryFood = basket.getFoods();
             for (int i = 0; i < partyFood.size(); i++) {
@@ -37,7 +37,7 @@ public class OrderMapper {
             pStatement.executeBatch();
             pStatement.close();
             pStatement = connection.prepareStatement(
-                   "replace into OrdinaryOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
+                   "insert into OrdinaryOrders(username, foodName, restaurantId, foodCount, orderId, foodPrice, status) values (?, ?, ?, ?, ?, ?, ?)");
             for (int i = 0; i < ordinaryFood.size(); i++) {
                 FoodMap food = ordinaryFood.get(i);
                 pStatement.setString(1, Manager.getInstance().getClient().getUsername());
@@ -96,6 +96,8 @@ public class OrderMapper {
                    boolean flag = true;
                    while (ordinaryResult.next()){
                        if(flag){
+                           int bid = ordinaryResult.getInt("orderId");
+                           basket.setId(bid);
                            String rid = ordinaryResult.getString("restaurantId");
                            basket.setRestaurantId(rid);
                            basket.setRestaurantName(Manager.getInstance().getRestaurantById(rid).getName());
@@ -112,6 +114,8 @@ public class OrderMapper {
                            + "\" and orderId = "+i);
                    while (discountResult.next()){
                        if(flag){
+                           int bid = discountResult.getInt("orderId");
+                           basket.setId(bid);
                            String rid = discountResult.getString("restaurantId");
                            basket.setRestaurantId(rid);
                            basket.setRestaurantName(Manager.getInstance().getRestaurantById(rid).getName());
@@ -160,38 +164,45 @@ public class OrderMapper {
 
     }
 
-    public int recoverOrdersAndGetAdditionalPrice(String username){
+    public void recoverOrdersInDb(){
         int price = 0;
         try {
             Connection connection = ConnectionPool.getInstance().getConnection();
-            Statement ordinaryStmt = connection.createStatement();
-            Statement discountStmt = connection.createStatement();
-            ResultSet ordinaryResult = ordinaryStmt.executeQuery("SELECT * FROM OrdinaryOrders where username = \"" + username
-                    + "\" and status!=\"Done\"");
-            while (ordinaryResult.next()){
-                price += ordinaryResult.getInt("foodCount")*ordinaryResult.getInt("foodPrice");
+            Statement user=connection.createStatement();
+            ResultSet userResult = user.executeQuery("SELECT username FROM User");
+            while (userResult.next()){
+                String username = userResult.getString("username");
+                Statement ordinaryStmt = connection.createStatement();
+                Statement discountStmt = connection.createStatement();
+                ResultSet ordinaryResult = ordinaryStmt.executeQuery("SELECT * FROM OrdinaryOrders where username = \"" + username
+                        + "\" and status!=\"Done\"");
+                while (ordinaryResult.next()){
+                    price += ordinaryResult.getInt("foodCount")*ordinaryResult.getInt("foodPrice");
+                }
+                ordinaryResult.close();
+                ordinaryStmt.close();
+                ResultSet discountResult = discountStmt.executeQuery("SELECT * FROM DiscountOrders where username = \"" + username
+                        + "\" and status!=\"Done\"");
+                while (discountResult.next()){
+                    price += discountResult.getInt("foodCount")*discountResult.getInt("foodPrice");
+                }
+                discountResult.close();
+                discountStmt.close();
+                connection.setAutoCommit(false);
+                Statement remove=connection.createStatement();
+                remove.addBatch("DELETE from OrdinaryOrders where username =\""+ username + "\" and status!=\"Done\"");
+                remove.addBatch("DELETE from DiscountOrders where username =\""+ username + "\" and status!=\"Done\"");
+                remove.executeBatch();
+                connection.commit();
+                remove.close();
+                UserMapper.getInstance().addCredit(username,price);
             }
-            ordinaryResult.close();
-            ordinaryStmt.close();
-            ResultSet discountResult = discountStmt.executeQuery("SELECT * FROM DiscountOrders where username = \"" + username
-                    + "\" and status!=\"Done\"");
-            while (discountResult.next()){
-                price += discountResult.getInt("foodCount")*discountResult.getInt("foodPrice");
-            }
-            discountResult.close();
-            discountStmt.close();
-            connection.setAutoCommit(false);
-            Statement remove=connection.createStatement();
-            remove.addBatch("DELETE from OrdinaryOrders where username =\""+ username + "\" and status!=\"Done\"");
-            remove.addBatch("DELETE from DiscountOrders where username =\""+ username + "\" and status!=\"Done\"");
-            remove.executeBatch();
-            connection.commit();
-            remove.close();
+            user.close();
+            userResult.close();
             connection.close();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-        return price;
     }
 
     public int getMaxOrderId(String username){

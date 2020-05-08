@@ -47,9 +47,10 @@ public class FoodPartyTimer extends TimerTask {
     public void run() {
         FoodPartyCounter.getInstance().stop();
         if(manager.getClient() != null){
-            manager.assignNewDiscountFoods();
-            if(manager.basketIsEmpty())
-                manager.assignNewBasket();
+            manager.emptyPartyOrders();
+
+           // if(manager.basketIsEmpty())
+               // manager.assignNewBasket();
         }
        /* try {
             recoverRestaurants();

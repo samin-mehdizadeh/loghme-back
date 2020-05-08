@@ -83,59 +83,82 @@ public class UserMapper {
         return 1;
     }
 
-    public void addCredit(Client client, int credit) throws SQLException {
-        Connection connection = ConnectionPool.getInstance().getConnection();
+    public int getCredit(String username){
+        int credit=0;
+        try{
+            Connection connection = ConnectionPool.getInstance().getConnection();
+            Statement stmt = connection.createStatement();
+            ResultSet Result = stmt.executeQuery("select credit from User WHERE username = \"" + username + "\" ");
+            while (Result.next()){
+                credit=Result.getInt("credit");
+            }
+            stmt.close();
+            Result.close();
+            connection.close();
 
-        String sqlQuery =
-                "update User " +
-                        "set credit = ?" +
-                        " where username = ?";
-        PreparedStatement updateQuery  = connection.prepareStatement(sqlQuery);
-        updateQuery.setInt(1,credit);
-        updateQuery.setString(2,client.getUsername());
-        int success = updateQuery.executeUpdate();
-        updateQuery.close();
-        connection.close();
-        System.out.println(success);
+
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+        }
+        return credit;
+    }
+
+    public void addCredit(String username, int credit) {
+        int c=0;
+        try {
+            Connection connection = ConnectionPool.getInstance().getConnection();
+            Statement updateQuery = connection.createStatement();
+            updateQuery.executeUpdate("UPDATE User SET credit = credit+"+credit+" WHERE username = \"" + username + "\"");
+            updateQuery.close();
+            connection.close();
+        }
+        catch (SQLException e){
+            System.out.println(e);
+        }
 
     }
 
     public Client selectUser(String username, String password,int firstTime) throws SQLException {
         Client loggedInClient = new Client();
         Connection connection = ConnectionPool.getInstance().getConnection();
-        Statement userSearchStatement = connection.createStatement();
-        ResultSet restaurantResult = null;
+        PreparedStatement userSearchStatement;
+        ResultSet rs = null;
         if(firstTime==1){
-            restaurantResult = userSearchStatement.executeQuery(
-                    "select * from User where User.username = \"" + username + "\""
-                            + " and USER.password = \"" + password + "\"");
+            String query = "select * from User where User.username = ? and User.password = ? ";
+            userSearchStatement = connection.prepareStatement(query);
+            userSearchStatement.setString(1,username);
+            userSearchStatement.setString(2,password);
+            rs = userSearchStatement.executeQuery();
         }
         else{
-            restaurantResult = userSearchStatement.executeQuery(
-                    "select * from User where User.username = \"" + username + "\"");
+            String query = "select * from User where User.username = ? ";
+            userSearchStatement = connection.prepareStatement(query);
+            userSearchStatement.setString(1,username);
+            rs = userSearchStatement.executeQuery();
         }
 
         boolean empty = true;
-        while( restaurantResult.next() ) {
-            loggedInClient.setCredit(restaurantResult.getInt("credit"));
-            loggedInClient.setUsername(restaurantResult.getString("username"));
-            loggedInClient.setName(restaurantResult.getString("name"));
-            loggedInClient.setLastName(restaurantResult.getString("lastName"));
-            loggedInClient.setEmailAddress(restaurantResult.getString("emailAddress"));
-            loggedInClient.setPhoneNumber(restaurantResult.getString("phoneNumber"));
-            loggedInClient.setPassword(restaurantResult.getString("password"));
+        while( rs.next() ) {
+            loggedInClient.setCredit(rs.getInt("credit"));
+            loggedInClient.setUsername(rs.getString("username"));
+            loggedInClient.setName(rs.getString("name"));
+            loggedInClient.setLastName(rs.getString("lastName"));
+            loggedInClient.setEmailAddress(rs.getString("emailAddress"));
+            loggedInClient.setPhoneNumber(rs.getString("phoneNumber"));
+            loggedInClient.setPassword(rs.getString("password"));
             empty = false;
         }
 
         if( empty ) {
             userSearchStatement.close();
-            restaurantResult.close();
+            rs.close();
             connection.close();
             return null;
         }
 
         userSearchStatement.close();
-        restaurantResult.close();
+        rs.close();
         connection.close();
         return loggedInClient;
     }
@@ -155,6 +178,40 @@ public class UserMapper {
                 System.out.println(e.getMessage());
         }
 
+    }
+
+    public Client selectUserByEmail(String email)throws SQLException {
+        Client loggedInClient = new Client();
+        Connection connection = ConnectionPool.getInstance().getConnection();
+        PreparedStatement userSearchStatement = connection.prepareStatement("select * from User where User.emailAddress = ?");
+        userSearchStatement.setString(1,email);
+
+        ResultSet rs = userSearchStatement.executeQuery();
+
+
+        boolean empty = true;
+        while( rs.next() ) {
+            loggedInClient.setCredit(rs.getInt("credit"));
+            loggedInClient.setUsername(rs.getString("username"));
+            loggedInClient.setName(rs.getString("name"));
+            loggedInClient.setLastName(rs.getString("lastName"));
+            loggedInClient.setEmailAddress(rs.getString("emailAddress"));
+            loggedInClient.setPhoneNumber(rs.getString("phoneNumber"));
+            loggedInClient.setPassword(rs.getString("password"));
+            empty = false;
+        }
+
+        if( empty ) {
+            userSearchStatement.close();
+            rs.close();
+            connection.close();
+            return null;
+        }
+
+        userSearchStatement.close();
+        rs.close();
+        connection.close();
+        return loggedInClient;
     }
 
 

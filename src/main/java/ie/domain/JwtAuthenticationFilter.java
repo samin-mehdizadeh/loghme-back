@@ -1,39 +1,39 @@
 package ie.domain;
 
+import com.google.api.client.googleapis.auth.oauth2.*;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import ie.repository.UserMapper;
-//import io.jsonwebtoken.ExpiredJwtException;
-//import io.jsonwebtoken.SignatureException;
-//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
-//import org.springframework.security.core.context.SecurityContextHolder;
-//import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.SignatureException;
-import org.springframework.web.filter.OncePerRequestFilter;
-import ie.domain.JwtTokenUtil;
+
 
 import javax.servlet.*;
-import javax.servlet.annotation.WebFilter;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.sql.SQLException;
-import java.util.Arrays;
 
 
-import java.io.IOException;
+
+import java.util.Collections;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 
-@WebFilter("/*")
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import org.springframework.web.bind.annotation.ModelAttribute;
+
+
+
 public class JwtAuthenticationFilter implements Filter {
 
     public JwtAuthenticationFilter() {
@@ -43,6 +43,39 @@ public class JwtAuthenticationFilter implements Filter {
 
     public void destroy() {
         // TODO Auto-generated method stub
+    }
+
+    public String verifyGoogle(String authToken) throws GeneralSecurityException, IOException {
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList("805689182939-0ga0omqkur2mmmo22066rphmi97d1qkt.apps.googleusercontent.com"))
+                .build();
+
+
+
+
+        GoogleIdToken idToken = verifier.verify(authToken);
+        if (idToken != null) {
+            Payload payload = idToken.getPayload();
+
+            String userId = payload.getSubject();
+            //System.out.println("User ID: " + userId);
+
+            // Get profile information from payload
+            String email = payload.getEmail();
+
+            boolean emailVerified = Boolean.valueOf(payload.getEmailVerified());
+            String name = (String) payload.get("name");
+            String pictureUrl = (String) payload.get("picture");
+            String locale = (String) payload.get("locale");
+            String familyName = (String) payload.get("family_name");
+            String givenName = (String) payload.get("given_name");
+            return email;
+
+        } else {
+            System.out.println("Invalid ID token.");
+            return null;
+        }
     }
 
 
@@ -58,6 +91,19 @@ public class JwtAuthenticationFilter implements Filter {
         System.out.println(header);
         if (header != null && header.startsWith("Bearer")) {
             authToken = header.replace("Bearer","");
+            if(path.contains("loginByGoogle")){
+                /*if (request.getHeader("X-Requested-With") == null) {
+                    // Without the `X-Requested-With` header, this request could be forged. Aborts.
+                }*/
+                try {
+                    String email = this.verifyGoogle(authToken);
+                    request.setAttribute("email",email);
+                    chain.doFilter(request, response);
+                } catch (GeneralSecurityException e) {
+                    e.printStackTrace();
+                }
+                return;
+            }
             try {
                 username = JwtTokenUtil.getInstance().getUserNameFromToken(authToken);
             } catch (IllegalArgumentException e) {
@@ -98,7 +144,7 @@ public class JwtAuthenticationFilter implements Filter {
                 }
 
                 else{
-                    RequestDispatcher requestDispatcher = request.getRequestDispatcher("/error/home");
+                    RequestDispatcher requestDispatcher = request.getRequestDispatcher("/error");
                     requestDispatcher.forward(request, response);
                 }
             }
@@ -109,27 +155,27 @@ public class JwtAuthenticationFilter implements Filter {
                 }
 
                 else {
-                    System.out.println("tt");
+
                     httpResponse.setStatus(401);
-                    RequestDispatcher requestDispatcher = request.getRequestDispatcher("/error/login");
+                    RequestDispatcher requestDispatcher = request.getRequestDispatcher("/error");
                     requestDispatcher.forward(request, response);
 
-                    System.out.println("tt1");
+
 
                 }
             }
         }
 
         else {
-            if(path.contains("checkLogin") || (path.contains("checkSignUp")) || (path.contains("login")) || path.contains("signup")) {
-                System.out.println("23");
+            if(path.contains("checkLogin") || (path.contains("checkSignUp")) || (path.contains("login")) || path.contains("signup")
+                    || (path.contains("loginByGoogle"))) {
                 chain.doFilter(request, response);
             }
 
             else {
-                System.out.println("hi");
+               // System.out.println("hi");
                 httpResponse.setStatus(401);
-                RequestDispatcher requestDispatcher = request.getRequestDispatcher("/error/login");
+                RequestDispatcher requestDispatcher = request.getRequestDispatcher("/error");
                 requestDispatcher.forward(request, response);
             }
         }

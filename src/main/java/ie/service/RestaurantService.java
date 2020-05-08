@@ -56,7 +56,6 @@ public class RestaurantService {
             id = Manager.getInstance().getClient().getCurrentBasket().getRestaurantId();
         }
         int status = Manager.getInstance().getClient().addOrdinaryToCart(food, id,count);
-        System.out.println( Manager.getInstance().getClient().getCurrentBasket());
         Result result = new Result();
         if(status == 0)
             result.setStatus(200);
@@ -144,7 +143,7 @@ public class RestaurantService {
             System.out.println("current");
             if(id == "null"){
                 addPartyFoodResult.setStatus(402);
-                addPartyFoodResult.setMessage("مهلت غذا تمام شده استتتتت" );
+                addPartyFoodResult.setMessage("مهلت غذا تمام شده است" );
                 return addPartyFoodResult;
             }
         }
@@ -155,12 +154,10 @@ public class RestaurantService {
         if(partyFood == null){
             addPartyFoodResult.setStatus(402);
             addPartyFoodResult.setMessage("مهلت غذا تمام شده است");
-            System.out.println("null");
             return addPartyFoodResult;
         }
 
         int status = Manager.getInstance().getClient().addPartyToCart(food, id, count);
-        System.out.println("uuu");
         System.out.println(status);
         if (status == -3){
             addPartyFoodResult.setStatus(402);
@@ -178,7 +175,7 @@ public class RestaurantService {
 
         else if(status == 0){
             addPartyFoodResult.setStatus(200);
-            addPartyFoodResult.setMessage(" سفارش " + partyFood.getName() + " با موقیت به سبد افزوده شد ");
+            addPartyFoodResult.setMessage(" سفارش " + partyFood.getName() + " با موفقیت به سبد افزوده شد ");
         }
 
         return addPartyFoodResult;

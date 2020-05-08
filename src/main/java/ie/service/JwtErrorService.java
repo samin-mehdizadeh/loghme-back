@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class JwtErrorService {
-    @RequestMapping(value = "/error/{destination}", method = RequestMethod.GET)
-    public Result getRestaurant(@PathVariable(value = "destination") String destination) {
+    @RequestMapping(value = "/error", method = RequestMethod.GET)
+    public Result getRestaurant() {
         Result result = new Result();
-        result.setMessage(destination);
+        result.setMessage("unvalid request");
         result.setStatus(-1);
         return result;
     }

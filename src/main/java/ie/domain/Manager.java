@@ -14,12 +14,24 @@ public class Manager {
 
     public void setClient(Client _client){
         this.client = _client;
+        String username = client.getUsername();
+        client.setCredit(UserMapper.getInstance().getCredit(username));
+        setClientBasket();
+        Manager.getInstance().insertPreviousOrdersFromDb(username);
+
     }
 
     public Client getClient(){
         return client;
     }
 
+    public void removeCurrentUserBasketInDb(){
+        CurrentBasketMapper.getInstance().removeCurrentUserBasket();
+    }
+
+    public void decreaseFoodCountInDb(String foodname,String type){
+        CurrentBasketMapper.getInstance().decreaseFoodCount(client.getUsername(),foodname,type);
+    }
     public void updatePartyCount(String food, String id, int value){
         PartyFoodMapper.getInstance().updateFoodcount(food,id,value);
     }
@@ -29,6 +41,14 @@ public class Manager {
             instance = new Manager();
         }
         return instance;
+    }
+
+    public void addCurrentFoodToDb(String foodName,int foodCount,int foodPrice,String restaurantId,String type){
+        CurrentBasketMapper.getInstance().insertFood(client.getUsername(),foodName,foodCount,foodPrice,restaurantId,type);
+    }
+
+    public void setClientBasket(){
+        client.setCurrentBasket(CurrentBasketMapper.getInstance().getCurrentUserBasket());
     }
 
     public int addUser(String name,String lastName,String phone,String email,String username,String password){
@@ -82,14 +102,13 @@ public class Manager {
 
     public int addCredit(int credit){
         client.setCredit(client.getCredit() + credit);
-        try {
-            UserMapper.getInstance().addCredit(client,client.getCredit());
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        UserMapper.getInstance().addCredit(client.getUsername(),credit);
         return client.getCredit();
     }
 
+    public void recoverOrdersInDb(){
+        OrderMapper.getInstance().recoverOrdersInDb();
+    }
 
 
     public void changebasketStatusInDb(String username,int orderId,String status){
@@ -177,12 +196,16 @@ public class Manager {
         }
     }
 
+    public void emptyPartyOrders(){
+        CurrentBasketMapper.getInstance().emptyPartyOrders();
+    }
+
     public int finalizeOrder(){ return client.finalizeOrder(); }
     public boolean basketIsEmpty(){ return client.basketIsEmpty();}
     public List<FoodMap> getClientOrdinaryCart() {return client.getCurrentBasket().getFoods();}
     public List<FoodMap> getClientPartyCart() {return client.getCurrentBasket().getDiscountFoods();}
     public String getClientRestaurantId() { return client.getCurrentBasket().getRestaurantId(); }
     public int calculatePrice() { return client.calculatePrice(); }
-    public void assignNewBasket() { client.assignNewBasket();}
-    public void assignNewDiscountFoods() {client.assignNewDiscountFoods();}
+    //public void assignNewBasket() { client.assignNewBasket();}
+    //public void assignNewDiscountFoods() {client.assignNewDiscountFoods();}
 }
