@@ -142,7 +142,8 @@ public class JwtAuthenticationFilter implements Filter {
                 System.out.println("authenticated user " + username + ", setting security context");
                 httpResponse.setStatus(200);
                 if((!path.contains("checkLogin")) && (!path.contains("checkSignUp"))){
-                    Manager.getInstance().setClient(user);
+                    if(!path.contains("restaurant") || !path.contains("search") || !path.contains("FoodPartyTime"))
+                        Manager.getInstance().setClient(user);
                     chain.doFilter(request, response);
                 }
 

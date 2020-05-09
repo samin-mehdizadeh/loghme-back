@@ -38,6 +38,7 @@ public class UserService {
     @RequestMapping(value = "/Orders", method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public List<Basket> getOrders() {
+        Manager.getInstance().insertPreviousOrdersFromDb(Manager.getInstance().getClient().getUsername());
         return Manager.getInstance().getClient().getBaskets();
 
     }

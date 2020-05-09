@@ -16,9 +16,8 @@ public class Manager {
         String username = client.getUsername();
         client.setCredit(UserMapper.getInstance().getCredit(username));
         setClientBasket();
-        Manager.getInstance().insertPreviousOrdersFromDb(username);
-
     }
+
 
     public Client getClient(){
         return client;
