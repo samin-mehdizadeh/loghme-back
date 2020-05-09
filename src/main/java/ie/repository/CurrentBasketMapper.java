@@ -151,7 +151,6 @@ public class CurrentBasketMapper {
             connection.close();
         }
         catch (SQLException e){
-            System.out.println("jkhkjhkh");
             System.out.println(e.getMessage());
         }
         return current;

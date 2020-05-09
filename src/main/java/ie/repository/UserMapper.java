@@ -2,6 +2,7 @@ package ie.repository;
 import ie.domain.*;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
@@ -72,7 +73,8 @@ public class UserMapper {
         pStatement.setString(4, newClient.getPhoneNumber());
         pStatement.setString(5, newClient.getEmailAddress());
         pStatement.setInt(6,newClient.getCredit());
-        pStatement.setString(7,newClient.getPassword());
+        String hashPass = Base64.getEncoder().encodeToString(newClient.getPassword().getBytes());
+        pStatement.setString(7,hashPass);
         pStatement.addBatch();
         pStatement.executeBatch();
         pStatement.close();
@@ -128,7 +130,8 @@ public class UserMapper {
             String query = "select * from User where User.username = ? and User.password = ? ";
             userSearchStatement = connection.prepareStatement(query);
             userSearchStatement.setString(1,username);
-            userSearchStatement.setString(2,password);
+            String hashPass = Base64.getEncoder().encodeToString(password.getBytes());
+            userSearchStatement.setString(2,hashPass);
             rs = userSearchStatement.executeQuery();
         }
         else{

@@ -187,7 +187,8 @@ public class RestaurantService {
 
     @RequestMapping(value = "/currentBasket", method = RequestMethod.GET)
     public Basket getCurrentBasket() {
-        return Manager.getInstance().getClient().getCurrentBasket();
+        return
+                Manager.getInstance().getClient().getCurrentBasket();
     }
 
 
