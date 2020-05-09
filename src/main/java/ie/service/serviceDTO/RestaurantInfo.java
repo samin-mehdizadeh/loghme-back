@@ -1,4 +1,4 @@
-package ie.service;
+package ie.service.serviceDTO;
 
 public class RestaurantInfo {
     private String id;

@@ -1,5 +1,5 @@
 package ie.repository;
-import ie.service.DiscountFoodProps;
+import ie.service.serviceDTO.DiscountFoodProps;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

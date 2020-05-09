@@ -1,4 +1,4 @@
-package ie.service;
+package ie.service.Filter;
 
 import java.io.IOException;
 import javax.servlet.Filter;

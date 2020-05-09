@@ -1,7 +1,6 @@
 package ie.domain;
 import ie.repository.*;
-import ie.domain.*;
-import ie.service.DiscountFoodProps;
+import ie.service.serviceDTO.DiscountFoodProps;
 
 import java.io.IOException;
 import java.sql.SQLException;

@@ -2,6 +2,7 @@ package ie.service;
 
 import ie.domain.Manager;
 import ie.domain.*;
+import ie.service.serviceDTO.RestaurantInfo;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 

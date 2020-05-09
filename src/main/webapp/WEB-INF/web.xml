@@ -5,7 +5,7 @@
 <web-app>
   <filter>
     <filter-name>cors</filter-name>
-    <filter-class>ie.service.CORSFilter</filter-class>
+    <filter-class>ie.service.Filter.CORSFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>cors</filter-name>
@@ -13,7 +13,7 @@
   </filter-mapping>
   <filter>
     <filter-name>authentication</filter-name>
-    <filter-class>ie.domain.JwtAuthenticationFilter</filter-class>
+    <filter-class>ie.service.Filter.JwtAuthenticationFilter</filter-class>
   </filter>
   <filter-mapping>
     <filter-name>authentication</filter-name>

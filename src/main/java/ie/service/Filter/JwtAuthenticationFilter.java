@@ -1,8 +1,11 @@
-package ie.domain;
+package ie.service.Filter;
 
 import com.google.api.client.googleapis.auth.oauth2.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import ie.domain.Client;
+import ie.domain.JwtTokenUtil;
+import ie.domain.Manager;
 import ie.repository.UserMapper;
 
 import io.jsonwebtoken.ExpiredJwtException;

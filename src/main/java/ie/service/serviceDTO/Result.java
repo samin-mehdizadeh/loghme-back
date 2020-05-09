@@ -1,4 +1,4 @@
-package ie.service;
+package ie.service.serviceDTO;
 
 public class Result {
     private int status;

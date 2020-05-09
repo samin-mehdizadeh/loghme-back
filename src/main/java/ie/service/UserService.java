@@ -2,8 +2,9 @@ package ie.service;
 
 import ie.domain.*;
 import ie.domain.Manager;
-import ie.repository.OrderMapper;
 import ie.repository.UserMapper;
+import ie.service.serviceDTO.Result;
+import ie.service.serviceDTO.UserCredit;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
